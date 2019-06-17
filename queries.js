@@ -6,7 +6,8 @@ const getUsers = (req, res) => {
     if (error) {
       throw error;
     }
-    response.status(200).json(results.row);
+    console.log(results.rows);
+    res.status(200).json(results.rows);
   });
 };
 
@@ -17,20 +18,26 @@ const getUsersById = (req, res) => {
     if (err) {
       throw err;
     }
-    response.status(200).json(results.row);
+    res.status(200).json(results.rows);
   });
 };
 
 const createUser = (req, res) => {
   const {name, email} = req.body;
+  console.log(name, email);
 
-  pool.query("INSERT INTO users(name, email) VALUES ($1 ,$2)", [
+  pool.query("INSERT INTO users(name, email) VALUES ($1 ,$2) returning id", [
     name, email
   ], (err, results) => {
     if (err) {
       throw err;
     }
-    response.status(201).send("User added with ID :$result.insertId");
+    const data = results.rows;
+    console.log(data);
+    res.status(201).send(
+      `User added with ID :${results.rows.length > 0
+      ? results.rows[0].id
+      : null} `);
   });
 };
 
@@ -44,7 +51,7 @@ const updateUser = (req, res) => {
     if (err) {
       throw err;
     }
-    response.status(200).send("User modified with ID :${id}");
+    res.status(200).send(`User modified with ID :${id}`);
   });
 };
 
@@ -55,7 +62,7 @@ const deleteUser = (req, res) => {
     if (err) {
       throw err;
     }
-    response.status(200).send("User deleted with ID :${id}");
+    res.status(200).send(`User deleted with ID :${id}`);
   });
 };
 
